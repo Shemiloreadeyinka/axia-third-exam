@@ -33,3 +33,13 @@ exports.login = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
+exports.delete = async(req,res)=>{
+  const {id}=req.params;
+  try {
+    const user=await User.findByIdAndDelete(id);
+    res.json({msg:'User deleted successfully'});
+  } catch (error) {
+    res.json({error:"we encounterd error deleting this user"})
+  }
+}
