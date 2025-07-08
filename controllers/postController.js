@@ -1,14 +1,12 @@
 const Post = require("../models/Post")
 const { User } = require("../models/User")
 
-Post = require("../models/Post")
-User = require("../models/User")
 
 exports.createPost=async(req,res)=>{
         body=req.body
-        id= req.user
+        id = req.user._id
     try {
-        const newPost=await new Post({author:id,...body})
+        const newPost=await new Post({user:id,...body})
         const savedPost= await newPost.save()
         
         await User.findByIdAndUpdate(id,{ $push: { posts: savedPost._id } },{new:true})
@@ -22,7 +20,7 @@ exports.createPost=async(req,res)=>{
 exports.getSinglePost=  async(req,res)=>{
     const id=req.params
     try {
-        const post= await Post.findById(id).populate('author')
+        const post= await Post.findById(id).populate('user')
         return res.status(200).json({message:post})
 
     } catch (error) {
@@ -47,12 +45,12 @@ exports.deletePost= async (req,res)=>{
     const {userId}=req.id
     post=await Post.findById(postId)
     if (!post){return res.json({msg:'post doesnt exist'})};    
-    if (post.author!= userId) res.json({msg:'this is not your psot to delete'})
+    if (post.user!= userId) res.json({msg:'this is not your psot to delete'})
 
     try {
 
         const deletedPost = await psot.findByIdAndUpdate(postId) 
-        await User.findByIdAndUpdate(post.author,{ $pull: { posts: post._id } },{new:true})
+        await User.findByIdAndUpdate(post.user,{ $pull: { posts: post._id } },{new:true})
         res.status(200).json({message:deletedPost})
 
     } catch (error) {
@@ -65,7 +63,7 @@ exports.updatePost= async(req,res)=>{
     try {
         post= await Post.findById(postId)
         if (!post) res.status(400).json({msg:'post doesnt exist'})
-        if  (post.author!= userId) res.status(400).json({message:'this is not your message to delete'})
+        if  (post.user!= userId) res.status(400).json({message:'this is not your message to delete'})
         const updatedPost= await Post.findByIdAndUpdate(postId,req.body,{new:true})
     res.status(200).json({message:updatedPost})
 
